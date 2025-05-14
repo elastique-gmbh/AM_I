@@ -9,11 +9,18 @@ Using a Meta Quest 3 headset, participants control cobots equipped with stereosc
 
 The experience intensifies when control and perspective are split: users find themselves piloting one cobot while perceiving the visual input of another. Combined with custom cobot voices and an ambient light-sound environment, “AM I?” becomes a multi-sensory experience of presence and disembodiment.
 
-Technical Overview
+# Technical Overview
+
 Real-time cobot control via VR
+
 Stereoscopic camera streaming
+
 Synchronized robot motion mirroring
+
 Split-identity mode (perceive one cobot, control another)
+
 Mirror installations for visual self-observation
+
 Custom sound and light design
+
 Modular technical setup for deployment
