@@ -21,6 +21,6 @@ Split-identity mode (perceive one cobot, control another)
 
 Mirror installations for visual self-observation
 
-Custom sound and light design
+Custom sound design with reactive Sound using Bitwig Studio
 
 Modular technical setup for deployment
