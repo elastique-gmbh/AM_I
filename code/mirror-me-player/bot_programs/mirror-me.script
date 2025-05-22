@@ -1,0 +1,188 @@
+def mirrorme():
+  global _hidden_verificationVariable=0
+  set_tool_communication(False, 115200, 0, 1, 1.5, 3.5)
+  set_tool_output_mode(0)
+  set_tool_digital_output_mode(0, 1)
+  set_tool_digital_output_mode(1, 1)
+  set_tool_voltage(0)
+  set_tcp(p[0.0,0.0,0.05,0.0,0.0,0.0])
+  set_gravity([0.0, 0.0, 9.82])
+  set_standard_analog_input_domain(0, 1)
+  set_standard_analog_input_domain(1, 1)
+  set_tool_analog_input_domain(0, 1)
+  set_tool_analog_input_domain(1, 1)
+  set_analog_outputdomain(0, 0)
+  set_analog_outputdomain(1, 0)
+  set_input_actions_to_default()
+  set_safety_mode_transition_hardness(1)
+  set_target_payload(0.100000, [0.000000, 0.000000, 0.000000], [0.000033, 0.000033, 0.000033, 0.000000, 0.000000, 0.000000])
+  # begin: URCap Installation Node
+  #   Source: UR Connect, 1.13.60, Universal Robots
+  #   Type: UR Connect
+  myurRPC = rpc_factory("xmlrpc","http://127.0.0.1:40474")
+  # end: URCap Installation Node
+  step_count_7eeab023_d5f0_4f6f_8e32_e4250a1ac6a3 = 0.0
+  thread Step_Counter_Thread_e032fd99_2fd9_4053_9283_75c37d127791():
+    while (True):
+      step_count_7eeab023_d5f0_4f6f_8e32_e4250a1ac6a3 = step_count_7eeab023_d5f0_4f6f_8e32_e4250a1ac6a3 + 1.0
+      sync()
+    end
+  end
+  run Step_Counter_Thread_e032fd99_2fd9_4053_9283_75c37d127791()
+  $ 2 "BeforeStart"
+  $ 3 "home_pose≔p[0.05,-0.55,1.1,0,0,0]"
+  global home_pose=p[0.05,-0.55,1.1,0,0,0]
+  $ 4 "last_good_joint≔[0,0,0,0,0,0]"
+  global last_good_joint=[0,0,0,0,0,0]
+  $ 5 "last_good_joint = get_inverse_kin(home_pose)"
+  last_good_joint = get_inverse_kin(home_pose)
+  $ 6 "move_pose≔home_pose"
+  global move_pose=home_pose
+  $ 7 "write_output_boolean_register(64,  False )"
+  write_output_boolean_register(64,   False  )
+  $ 8 "Wait: 0.1"
+  sleep(0.1)
+  $ 9 "mode≔0"
+  global mode=0
+  $ 10 "j≔[move_pose[0], move_pose[1], move_pose[2], move_pose[2], move_pose[4], move_pose[5],0]"
+  global j=[move_pose[0], move_pose[1], move_pose[2], move_pose[2], move_pose[4], move_pose[5],0]
+  $ 11 "joints≔[0,0,0,0,0,0]"
+  global joints=[0,0,0,0,0,0]
+  $ 12 "current_speed≔0.0"
+  global current_speed=0.0
+  $ 46 "Thread_1"
+  thread Thread_1():
+    while (True):
+      $ 47 "Loop"
+      while (True):
+        $ 48 "tmp≔[0,0,0,0,0,0,0]"
+        global tmp=[0,0,0,0,0,0,0]
+        $ 49 "tmp[0] = read_input_float_register(0)"
+        tmp[0] = read_input_float_register(0)
+        $ 50 "tmp[1] = read_input_float_register(1)"
+        tmp[1] = read_input_float_register(1)
+        $ 51 "tmp[2] = read_input_float_register(2)"
+        tmp[2] = read_input_float_register(2)
+        $ 52 "tmp[3] = read_input_float_register(3)"
+        tmp[3] = read_input_float_register(3)
+        $ 53 "tmp[4] = read_input_float_register(4)"
+        tmp[4] = read_input_float_register(4)
+        $ 54 "tmp[5] = read_input_float_register(5)"
+        tmp[5] = read_input_float_register(5)
+        $ 55 "tmp[6] = read_input_float_register(6)"
+        tmp[6] = read_input_float_register(6)
+        $ 56 "j≔tmp"
+        global j=tmp
+        $ 57 "sync()"
+        sync()
+      end
+    end
+  end
+  threadId_Thread_1 = run Thread_1()
+  while (True):
+    $ 13 "Robot Program"
+    $ 14 "write_output_boolean_register(64, False)"
+    write_output_boolean_register(64, False)
+    $ 15 "mode = read_input_integer_register(0)"
+    mode = read_input_integer_register(0)
+    $ 16 "Loop mode ≤ 4"
+    while (mode  <=  4):
+      $ 17 "Loop mode ≟ 3"
+      while (mode  ==  3):
+        $ 18 "joints = get_inverse_kin(home_pose)"
+        joints = get_inverse_kin(home_pose)
+        $ 19 "servoj(joints, t=0.02, lookahead_time=0.5, gain=0.2)"
+        servoj(joints, t=0.02, lookahead_time=0.5, gain=0.2)
+        $ 20 "write_output_boolean_register(64, True )"
+        write_output_boolean_register(64,  True  )
+        $ 21 "mode = read_input_integer_register(0)"
+        mode = read_input_integer_register(0)
+        $ 22 "sync()"
+        sync()
+      end
+      $ 23 "Loop mode ≟ 4 "
+      while (mode  ==  4 ):
+        $ 24 "If current_speed < 1.0"
+        if (current_speed < 1.0):
+          $ 25 "current_speed = current_speed + 0.02"
+          current_speed = current_speed + 0.02
+        end
+        $ 26 "move_pose = p[j[0],j[1],j[2],0,0,0]"
+        move_pose = p[j[0],j[1],j[2],0,0,0]
+        $ 27 "tool_pose = p[0,0,0,0,0,j[6]]"
+        tool_pose = p[0,0,0,0,0,j[6]]
+        $ 28 "tool_pose = pose_trans(tool_pose, p[0,0,0.058,0,0,0])"
+        tool_pose = pose_trans(tool_pose, p[0,0,0.058,0,0,0])
+        $ 29 "tool_pose = pose_trans(tool_pose, p[0,0,0,j[3],j[4],j[5]])"
+        tool_pose = pose_trans(tool_pose, p[0,0,0,j[3],j[4],j[5]])
+        $ 32 "move_pose = pose_trans(move_pose, tool_pose)"
+        move_pose = pose_trans(move_pose, tool_pose)
+        $ 33 "If get_inverse_kin_has_solution(move_pose) and is_within_safety_limits(move_pose)"
+        if (get_inverse_kin_has_solution(move_pose) and is_within_safety_limits(move_pose)):
+          $ 34 "Script: pose_limit.script"
+          joints = get_inverse_kin(move_pose)
+          current_joints = get_actual_joint_positions()
+          max_change = [0.6, 0.35, 0.35, 0.45, 0.5, 0.5]
+          j_max = [3.05,-1.0472,2.44346,-0.174533,2.44346,3.14159]
+          j_min = [-1.48353,-2.61799,0.261799,-2.26893,0.872665,-3.14159]
+          
+          s_off = 0.1
+          
+          max_change = max_change * current_speed
+          
+          NumChecks=6
+          
+          joints_diff = joints - current_joints
+          Count=0
+          while Count < NumChecks:
+          	if joints_diff[Count] > max_change[Count]:
+          		joints[Count] = current_joints[Count] + max_change[Count]
+          	end
+          	if joints_diff[Count] < -max_change[Count]:
+          		joints[Count] = current_joints[Count] - max_change[Count]
+          	end
+          	Count=Count+1
+          end
+          Count=0
+          while Count < NumChecks:
+          	if joints[Count]  + s_off  > j_max[Count]:
+          		textmsg("limit+ ", Count)
+          		joints[Count] = j_max[Count] - s_off
+          
+          		textmsg("res ", joints[Count])
+          	end
+          	if joints[Count]  - s_off  < j_min[Count]:
+          		textmsg("limit- ", Count)
+          		joints[Count] = j_min[Count] + s_off
+          		textmsg("res ", joints[Count])
+          	end
+          	Count = Count +1
+          end
+          $ 35 "If is_within_safety_limits(joints)"
+          if (is_within_safety_limits(joints)):
+            $ 36 "last_good_joint≔joints"
+            global last_good_joint=joints
+          end
+        else:
+          $ 37 "Else" "noBreak"
+          $ 38 "current_speed = 0.0"
+          current_speed = 0.0
+        end
+        $ 39 "servoj(last_good_joint, t=0.02, lookahead_time=0.1, gain=300)"
+        servoj(last_good_joint, t=0.02, lookahead_time=0.1, gain=300)
+        $ 40 "write_output_boolean_register(64, True )"
+        write_output_boolean_register(64,  True  )
+        $ 41 "mode = read_input_integer_register(0)"
+        mode = read_input_integer_register(0)
+        $ 42 "sync()"
+        sync()
+      end
+      $ 43 "mode = read_input_integer_register(0)"
+      mode = read_input_integer_register(0)
+      $ 44 "write_output_boolean_register(64, False)"
+      write_output_boolean_register(64, False)
+      $ 45 "sync()"
+      sync()
+    end
+  end
+end

@@ -1,0 +1,58 @@
+ Program
+   Variables Setup
+   BeforeStart
+     home_pose≔p[0.05,-0.55,1.1,0,0,0]
+     last_good_joint≔[0,0,0,0,0,0]
+     last_good_joint = get_inverse_kin(home_pose)
+     move_pose≔home_pose
+     write_output_boolean_register(64,  False )
+     Wait: 0.1
+     mode≔0
+     j≔[move_pose[0], move_pose[1], move_pose[2], move_pose[2], move_pose[4], move_pose[5],0]
+     joints≔[0,0,0,0,0,0]
+     current_speed≔0.0
+   Robot Program
+     write_output_boolean_register(64, False)
+     mode = read_input_integer_register(0)
+     Loop mode ≤ 4
+       Loop mode ≟ 3
+         joints = get_inverse_kin(home_pose)
+         servoj(joints, t=0.02, lookahead_time=0.5, gain=0.2)
+         write_output_boolean_register(64, True )
+         mode = read_input_integer_register(0)
+         sync()
+       Loop mode ≟ 4 
+         If current_speed < 1.0
+           current_speed = current_speed + 0.02
+         move_pose = p[j[0],j[1],j[2],0,0,0]
+         tool_pose = p[0,0,0,0,0,j[6]]
+         tool_pose = pose_trans(tool_pose, p[0,0,0.058,0,0,0])
+         tool_pose = pose_trans(tool_pose, p[0,0,0,j[3],j[4],j[5]])
+         'tool_pose = pose_add(tool_pose, p[0,0,0,0,j[4],0])'
+         'tool_pose = pose_add(tool_pose, p[0,0,0,j[3],0,0])'
+         move_pose = pose_trans(move_pose, tool_pose)
+         If get_inverse_kin_has_solution(move_pose) and is_within_safety_limits(move_pose)
+           Script: pose_limit.script
+           If is_within_safety_limits(joints)
+             last_good_joint≔joints
+         Else
+           current_speed = 0.0
+         servoj(last_good_joint, t=0.02, lookahead_time=0.1, gain=300)
+         write_output_boolean_register(64, True )
+         mode = read_input_integer_register(0)
+         sync()
+       mode = read_input_integer_register(0)
+       write_output_boolean_register(64, False)
+       sync()
+   Thread_1
+     Loop
+       tmp≔[0,0,0,0,0,0,0]
+       tmp[0] = read_input_float_register(0)
+       tmp[1] = read_input_float_register(1)
+       tmp[2] = read_input_float_register(2)
+       tmp[3] = read_input_float_register(3)
+       tmp[4] = read_input_float_register(4)
+       tmp[5] = read_input_float_register(5)
+       tmp[6] = read_input_float_register(6)
+       j≔tmp
+       sync()
